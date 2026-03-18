@@ -1,0 +1,4 @@
+packages:
+  - "benchmark"
+  - "examples/*"
+  - "!examples/bun"

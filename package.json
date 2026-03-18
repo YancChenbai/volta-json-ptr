@@ -1,0 +1,104 @@
+{
+  "name": "volta-json-ptr",
+  "version": "0.0.0",
+  "description": "JSON Pointer library",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "dev": "./src/runtime.ts",
+      "default": "./dist/index.js"
+    },
+    "./bun": {
+      "dev": "./src/plugins/bun.ts",
+      "default": "./dist/bun.js"
+    },
+    "./esbuild": {
+      "dev": "./src/plugins/esbuild.ts",
+      "default": "./dist/esbuild.js"
+    },
+    "./farm": {
+      "dev": "./src/plugins/farm.ts",
+      "default": "./dist/farm.js"
+    },
+    "./macros": "./dist/macros.d.ts",
+    "./rolldown": {
+      "dev": "./src/plugins/rolldown.ts",
+      "default": "./dist/rolldown.js"
+    },
+    "./rollup": {
+      "dev": "./src/plugins/rollup.ts",
+      "default": "./dist/rollup.js"
+    },
+    "./rspack": {
+      "dev": "./src/plugins/rspack.ts",
+      "default": "./dist/rspack.js"
+    },
+    "./unplugin": {
+      "dev": "./src/plugins/index.ts",
+      "default": "./dist/unplugin.js"
+    },
+    "./vite": {
+      "dev": "./src/plugins/vite.ts",
+      "default": "./dist/vite.js"
+    },
+    "./webpack": {
+      "dev": "./src/plugins/webpack.ts",
+      "default": "./dist/webpack.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.js",
+      "./bun": "./dist/bun.js",
+      "./esbuild": "./dist/esbuild.js",
+      "./farm": "./dist/farm.js",
+      "./macros": "./dist/macros.d.ts",
+      "./rolldown": "./dist/rolldown.js",
+      "./rollup": "./dist/rollup.js",
+      "./rspack": "./dist/rspack.js",
+      "./unplugin": "./dist/unplugin.js",
+      "./vite": "./dist/vite.js",
+      "./webpack": "./dist/webpack.js",
+      "./package.json": "./package.json"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "build": "tsdown",
+    "release:prepare": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "release": "pnpm release:prepare && bumpp && pnpm publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "@vitest/ui": "^4.1.0",
+    "bumpp": "^11.0.1",
+    "magic-string": "^0.30.21",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
+    "simple-git-hooks": "^2.13.1",
+    "tsdown": "^0.21.4",
+    "typescript": "^5.9.3",
+    "unplugin": "^3.0.0",
+    "vitest": "^4.1.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm fmt & pnpm lint:fix",
+    "pre-push": "pnpm fmt & pnpm lint:fix"
+  },
+  "packageManager": "pnpm@10.26.0"
+}
