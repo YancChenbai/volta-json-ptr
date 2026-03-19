@@ -1,6 +1,6 @@
 {
   "name": "volta-json-ptr",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-beta.2",
   "description": "JSON Pointer library",
   "keywords": [],
   "license": "ISC",
@@ -57,6 +57,7 @@
   },
   "publishConfig": {
     "access": "public",
+    "registry": "https://registry.npmjs.org/",
     "exports": {
       ".": "./dist/index.js",
       "./bun": "./dist/bun.js",
