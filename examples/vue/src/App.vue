@@ -30,10 +30,8 @@ console.log(qux);
 
 <template>
   <h1>Volta Json Ptr</h1>
-  <p>{{ baz }}</p>
   <p>{{ data }}</p>
   <p>{{ seek(myRef, '/f') }}</p>
-  <p>{{ seek(myRea, '/f') }}</p>
 </template>
 
 <style scoped></style>

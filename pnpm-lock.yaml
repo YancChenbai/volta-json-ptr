@@ -50,6 +50,10 @@ importers:
         version: 4.1.0(@types/node@24.12.0)(@vitest/ui@4.1.0)(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.4)(jiti@2.6.1)(yaml@2.8.2))
 
   benchmark:
+    dependencies:
+      '@jsonjoy.com/json-pointer':
+        specifier: ^18.0.0
+        version: 18.0.0(tslib@2.8.1)
     devDependencies:
       tinybench:
         specifier: ^6.0.0
@@ -512,6 +516,36 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@jsonjoy.com/buffers@18.0.0':
+    resolution: {integrity: sha512-XFB2XUJlcx5eG4kKbaRBIBhbDtJFNGbI91gCnB/jTHY39Aoi2fNvw257RUCnXKxiTNWN5cpxp4qLu30GHp5fOw==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/codegen@18.0.0':
+    resolution: {integrity: sha512-roZo9yL367WqfFW13BTybTwIqmtTEQ3M659WFy+AWmF2z2uRFQCx5zsatNbQfH4CqIfZHLFeSqy5cnlgd83dsw==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/json-equal@18.0.0':
+    resolution: {integrity: sha512-U3RspkLpUrZ+OO7TK2E9QaxNtrcYP2gYjKlKE1MPAive9Xxf2zVwPrPsAn8+owxX9Ea+8upJV6qfA8X8FDyviA==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '*'
+
+  '@jsonjoy.com/json-pointer@18.0.0':
+    resolution: {integrity: sha512-Kiv6DD/Tu51MH4NAwQoZh0CjNbb78bdbDTASJpNnHeXkVgTq3UrknEFAb9oFXymoDx/hboNVppfNG63hVvY42w==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/util@18.0.0':
+    resolution: {integrity: sha512-6DQK34jtuLS6OQtDwKSxGfIMv3LoJiEqMUCmZlu7rYgf/iPcJouIH0mUAsWjVWDY8pZXkLBSQIa40pDIEpiwOA==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -2772,6 +2806,31 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@jsonjoy.com/buffers@18.0.0(tslib@2.8.1)':
+    dependencies:
+      tslib: 2.8.1
+
+  '@jsonjoy.com/codegen@18.0.0(tslib@2.8.1)':
+    dependencies:
+      tslib: 2.8.1
+
+  '@jsonjoy.com/json-equal@18.0.0(tslib@2.8.1)':
+    dependencies:
+      '@jsonjoy.com/codegen': 18.0.0(tslib@2.8.1)
+      tslib: 2.8.1
+
+  '@jsonjoy.com/json-pointer@18.0.0(tslib@2.8.1)':
+    dependencies:
+      '@jsonjoy.com/util': 18.0.0(tslib@2.8.1)
+      tslib: 2.8.1
+
+  '@jsonjoy.com/util@18.0.0(tslib@2.8.1)':
+    dependencies:
+      '@jsonjoy.com/buffers': 18.0.0(tslib@2.8.1)
+      '@jsonjoy.com/codegen': 18.0.0(tslib@2.8.1)
+      '@jsonjoy.com/json-equal': 18.0.0(tslib@2.8.1)
+      tslib: 2.8.1
+
   '@manypkg/find-root@1.1.0':
     dependencies:
       '@babel/runtime': 7.29.2
@@ -4065,8 +4124,7 @@ snapshots:
       - synckit
       - vue-tsc
 
-  tslib@2.8.1:
-    optional: true
+  tslib@2.8.1: {}
 
   typescript@5.9.3: {}
 

@@ -16,5 +16,8 @@
     "typescript": "^5.9.3",
     "volta-json-ptr": "workspace:*"
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "dependencies": {
+    "@jsonjoy.com/json-pointer": "^18.0.0"
+  }
 }
