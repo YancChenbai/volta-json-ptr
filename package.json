@@ -57,7 +57,6 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/",
     "exports": {
       ".": "./dist/index.js",
       "./bun": "./dist/bun.js",
@@ -71,7 +70,8 @@
       "./vite": "./dist/vite.js",
       "./webpack": "./dist/webpack.js",
       "./package.json": "./package.json"
-    }
+    },
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "test": "vitest run",
@@ -84,7 +84,11 @@
     "lint:fix": "oxlint --fix",
     "build": "tsdown",
     "release:prepare": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "release": "pnpm release:prepare && bumpp && pnpm publish"
+    "release": "pnpm release:prepare && bumpp && pnpm publish",
+    "benchmark": "pnpm build && pnpm --filter @volta-json-ptr/benchmark run start"
+  },
+  "dependencies": {
+    "oxc-parser": "^0.120.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
@@ -104,8 +108,5 @@
     "pre-commit": "pnpm fmt & pnpm lint:fix",
     "pre-push": "pnpm fmt & pnpm lint:fix"
   },
-  "packageManager": "pnpm@10.26.0",
-  "dependencies": {
-    "oxc-parser": "^0.120.0"
-  }
+  "packageManager": "pnpm@10.26.0"
 }
