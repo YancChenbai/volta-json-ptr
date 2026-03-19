@@ -28,6 +28,7 @@
       "default": "./dist/farm.js"
     },
     "./macros": "./dist/macros.d.ts",
+    "./vue-macros": "./dist/vue-macros.d.ts",
     "./rolldown": {
       "dev": "./src/plugins/rolldown.ts",
       "default": "./dist/rolldown.js"
@@ -73,6 +74,7 @@
   },
   "scripts": {
     "test": "vitest run",
+    "test:watch": "vitest --watch run",
     "test:ui": "vitest --ui",
     "typecheck": "tsc --noEmit",
     "fmt": "oxfmt",
@@ -85,6 +87,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
+    "@oxc-project/types": "^0.121.0",
     "@vitest/ui": "^4.1.0",
     "bumpp": "^11.0.1",
     "magic-string": "^0.30.21",
@@ -100,5 +103,8 @@
     "pre-commit": "pnpm fmt & pnpm lint:fix",
     "pre-push": "pnpm fmt & pnpm lint:fix"
   },
-  "packageManager": "pnpm@10.26.0"
+  "packageManager": "pnpm@10.26.0",
+  "dependencies": {
+    "oxc-parser": "^0.120.0"
+  }
 }

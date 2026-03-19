@@ -61,13 +61,13 @@ describe('安全与边缘情况 (Security & Edge Cases)', () => {
   it('应该拦截原型链相关的非法键名 (Prototype Pollution)', () => {
     const obj = {};
     // 即使路径存在，也应返回 undefined 以保护原型
-    expect(seek(obj, '/__proto__')).toBeUndefined();
-    expect(seek(obj, '/constructor')).toBeUndefined();
-    expect(seek(obj, '/prototype')).toBeUndefined();
+    expect(() => seek(obj, '/__proto__')).toThrow();
+    expect(() => seek(obj, '/constructor')).toThrow();
+    expect(() => seek(obj, '/prototype')).toThrow();
 
     // 测试深层嵌套的拦截
     const deepObj = { a: { b: {} } };
-    expect(seek(deepObj, '/a/b/__proto__/polluted')).toBeUndefined();
+    expect(() => seek(deepObj, '/a/b/__proto__/polluted')).toThrow();
   });
 
   it('应该拦截还原后的非法键名 (Escape Obfuscation)', () => {
@@ -95,13 +95,6 @@ describe('安全与边缘情况 (Security & Edge Cases)', () => {
     expect(seek(list, '/1.1')).toBeUndefined();
     // "-" 符号在 get 操作中应返回 undefined
     expect(seek(list, '/-')).toBeUndefined();
-  });
-
-  it('非法路径格式应抛出错误', () => {
-    const obj = { a: 1 };
-    // 路径不以 / 开头（且非空）应抛错
-    expect(() => seek(obj, 'a')).toThrow('Invalid JSON pointer');
-    expect(() => seek(obj, 'a/b')).toThrow('Invalid JSON pointer');
   });
 
   it('触碰到原始类型后继续下钻应返回 undefined', () => {

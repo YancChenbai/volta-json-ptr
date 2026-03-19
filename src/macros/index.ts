@@ -1,4 +1,4 @@
-import { GetByPointer, JsonValue } from './shared';
+import { GetByPointer, JsonValue } from '../shared';
 
 type Seek = <T extends JsonValue, P extends string>(obj: T, path: P) => GetByPointer<T, P>;
 

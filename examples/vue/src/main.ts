@@ -15,6 +15,8 @@ const json = {
   },
 };
 
-const baz = seek(json as {}, '/foo/bar/baz');
+const path = '/foo/bar/baz';
+const baz = seek(json, '/foo/bar/baz');
 
 console.log(baz);
+console.log(seek(json, path));

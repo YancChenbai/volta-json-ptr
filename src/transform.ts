@@ -1,101 +1,164 @@
 import MagicString from 'magic-string';
+import { CallExpression, parse, ParseResult, Visitor } from 'oxc-parser';
 
-import { RE_STRICT_UINT, INVALID_KEYS, decodePointerKey } from '#shared';
+import { transformPointerToChain } from '#shared';
 
-export function transformPointerToChain(path: string, receiver: string): string {
-  // 根路径处理
-  if (path === '' || path === '/') return receiver;
+const PACKAGE_NAME = 'volta-json-ptr';
+const MACRO_FUNCTION = 'seek';
 
-  // 校验
-  if (path[0] !== '/') {
-    console.warn(`[volta-json-ptr] Security Risk: Path "${path}" is not a valid JSON pointer`);
-    return receiver;
-  }
-
-  // 切分逻辑
-  const segments = path.split('/').slice(1);
-
-  if (segments.length > 1 && segments[segments.length - 1] === '') {
-    segments.pop();
-  }
-
-  let chain = receiver;
-
-  for (const rawKey of segments) {
-    // 解码
-    const key = decodePointerKey(rawKey);
-
-    // 静态路径如果包含非法键，直接在编译期阻断
-    if (INVALID_KEYS.has(key)) {
-      throw new Error(
-        `[volta-json-ptr] Security Risk: Forbidden key "${key}" found in static path "${path}"`,
-      );
-    }
-
-    // 生成可选链片段
-    const isUint = RE_STRICT_UINT.test(key);
-    const accessor = isUint ? `[${key}]` : `[${JSON.stringify(key)}]`;
-
-    chain += `?.${accessor}`;
-  }
-
-  return chain;
+export enum FileType {
+  JS = 'js',
+  VUE = 'vue',
 }
 
-const seekRegex =
-  /(?:_?unref\s*\(\s*(?:\$setup\.|_ctx\.)?seek\s*\)|(?:\$setup\.|_ctx\.)?seek)\s*\(\s*([^,]+)\s*,\s*['"]([^'"]*)['"]\s*\)/g;
-const importRegex = /import\s*\{([\s\S]*?)\}\s*from\s*['"]volta-json-ptr['"]\s*;?/g;
+function findPackImport(ast: ParseResult) {
+  return ast.module.staticImports.find((i) => i.moduleRequest.value === PACKAGE_NAME);
+}
 
-export function transform(code: string, id: string) {
-  if (!code.includes('seek') && !code.includes('volta-json-ptr')) return null;
+export function findMethodImport(ast: ParseResult) {
+  const imp = findPackImport(ast);
 
-  const s = new MagicString(code);
-
-  // transform seek
-  const matches = [...code.matchAll(seekRegex)];
-
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const m = matches[i];
-
-    if (!m) continue;
-
-    const start = m.index!;
-    const end = start + m[0].length;
-
-    const receiver = m[1];
-    const path = m[2];
-
-    if (!path || !receiver) continue;
-
-    const replacement = transformPointerToChain(path, receiver);
-
-    s.overwrite(start, end, replacement);
+  if (!imp) {
+    return null;
   }
 
-  // remove import
-  for (const m of code.matchAll(importRegex)) {
-    const [fullMatch, importContent] = m;
-    const start = m.index!;
-    const end = start + fullMatch.length;
+  const seekIndex = imp.entries.findIndex((i) => i.importName.name === MACRO_FUNCTION && !i.isType);
 
-    if (!importContent) continue;
+  // no macro function
+  if (seekIndex === -1) return null;
 
-    // 检查是否包含 seek
-    if (importContent.includes('seek')) {
-      // 将 seek 及其前后的逗号、空格替换为空
-      // 这里的正则匹配 `seek` `seek,` `, seek`
-      const newContent = importContent
-        .replace(/\bseek\b\s*,?/g, '')
-        .replace(/,\s*$/, '') // 清理末尾多余的逗号
-        .trim();
+  const { entries } = imp;
 
-      if (newContent.length === 0) {
-        // 如果除了 seek 没别的东西了，直接删整行
-        s.remove(start, end);
+  // only macro function
+  if (entries.length === 1) {
+    return [imp.start, imp.end] as const;
+  }
+
+  const entry = entries[seekIndex]!;
+  let start = entry.importName.start!;
+  let end = entry.localName.end ?? entry.importName.end;
+
+  // remove `,`
+  // is not last
+  if (seekIndex < entries.length - 1) {
+    const nextEntry = entries[seekIndex + 1];
+    end = nextEntry?.importName.start ?? end;
+  }
+  // is not first
+  else if (seekIndex > 0) {
+    const prevEntry = entries[seekIndex - 1];
+    start = prevEntry?.importName.end ?? start;
+  }
+
+  return [start, end] as const;
+}
+
+function recognizeJS(node: CallExpression) {
+  if (node.callee.type !== 'Identifier') return null;
+  if (node.callee.name !== MACRO_FUNCTION) return null;
+
+  return node;
+}
+
+function recognizeVue(node: CallExpression) {
+  if (node.callee.type !== 'MemberExpression') return null;
+
+  const { object, property } = node.callee;
+
+  if (object.type !== 'Identifier' || property.type !== 'Identifier') return null;
+
+  if (!['_ctx', '$setup'].includes(object.name)) return null;
+
+  if (property.name === MACRO_FUNCTION) return node;
+
+  return null;
+}
+
+function matchMacroCall(node: CallExpression, fileType: FileType = FileType.JS) {
+  if (fileType === FileType.VUE) {
+    const vueNode = recognizeVue(node);
+    if (vueNode) return vueNode;
+  }
+
+  return recognizeJS(node);
+}
+
+function getFileType(id: string) {
+  if (id.includes('.vue')) return FileType.VUE;
+
+  return FileType.JS;
+}
+
+export function handleSeekMacro(ast: ParseResult, fileType: FileType = FileType.JS) {
+  let hasDynamicPath = false;
+  let hasAnyCall = false;
+
+  const list: [
+    callRange: { start: number; end: number },
+    receiverRange: { start: number; end: number },
+    path: string,
+  ][] = [];
+  const visitor = new Visitor({
+    CallExpression(node) {
+      const matchNode = matchMacroCall(node, fileType);
+
+      if (!matchNode) return;
+
+      hasAnyCall = true;
+      const [arg0, arg1] = matchNode.arguments;
+
+      // find `seek` call, must static path
+      if (
+        matchNode.arguments.length == 2 &&
+        arg0 &&
+        arg1?.type === 'Literal' &&
+        typeof arg1.value === 'string'
+      ) {
+        list.push([
+          { start: matchNode.start, end: matchNode.end },
+          { start: arg0.start, end: arg0.end },
+          arg1.value,
+        ]);
       } else {
-        // 重构导入语句
-        s.overwrite(start, end, `import { ${newContent} } from 'volta-json-ptr';`);
+        hasDynamicPath = true;
       }
+    },
+  });
+
+  visitor.visit(ast.program);
+
+  return {
+    list,
+    hasDynamicPath,
+    hasAnyCall,
+  };
+}
+
+export async function transform(code: string, id: string) {
+  const ast = await parse(id, code);
+  const s = new MagicString(code);
+  const fileType = getFileType(id);
+
+  const { list, hasDynamicPath, hasAnyCall } = handleSeekMacro(ast, fileType);
+
+  list.forEach(([callRange, receiverRange, path]) => {
+    const overwrite =
+      code.substring(receiverRange.start, receiverRange.end) + transformPointerToChain(path);
+
+    s.overwrite(callRange.start, callRange.end, overwrite);
+  });
+
+  if (hasAnyCall) {
+    const range = findMethodImport(ast);
+
+    // has dynamic path and no method import
+    if (hasDynamicPath && !range) {
+      s.prepend(`import { ${MACRO_FUNCTION} } from '${PACKAGE_NAME}';\n`);
+    }
+
+    // not has dynamic path. remove import
+    else if (!hasDynamicPath && range) {
+      s.remove(range[0], range[1]);
     }
   }
 
@@ -103,10 +166,6 @@ export function transform(code: string, id: string) {
 
   return {
     code: s.toString(),
-    map: s.generateMap({
-      source: id,
-      includeContent: true,
-      hires: true,
-    }),
+    map: s.generateMap({ hires: true }),
   };
 }

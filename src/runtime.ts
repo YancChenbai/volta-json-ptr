@@ -1,4 +1,4 @@
-import { RE_ESC_1, RE_ESC_0, RE_STRICT_UINT, INVALID_KEYS } from '#shared';
+import { RE_STRICT_UINT, INVALID_KEYS, transformPointerToChain, decodePointerKey } from '#shared';
 import type { GetByPointer, JsonValue } from '#shared';
 
 export function seek<T extends JsonValue, P extends string>(obj: T, path: P): GetByPointer<T, P>;
@@ -7,13 +7,10 @@ export function seek(obj: any, path: string): JsonValue | undefined {
   // 根路径处理："" 或 "/" 指向原对象
   if (path === '' || path === '/') return obj;
 
-  // 格式校验：非空路径必须以 "/" 开头
-  if (path[0] !== '/') {
-    throw new Error(`Invalid JSON pointer: "${path}". Path must begin with a forward slash.`);
-  }
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
   // 路径切分
-  const segments = path.split('/').slice(1);
+  const segments = normalizedPath.split('/').slice(1);
 
   // 如果以斜杠结尾（如 "/a/"）, 去掉末尾产生的空片段
   if (segments.length > 1 && segments[segments.length - 1] === '') {
@@ -29,22 +26,19 @@ export function seek(obj: any, path: string): JsonValue | undefined {
     }
 
     // 将 ~1 还原为 /, 将 ~0 还原为 ~
-    const key =
-      rawKey.indexOf('~') !== -1 ? rawKey.replace(RE_ESC_1, '/').replace(RE_ESC_0, '~') : rawKey;
+    const key = decodePointerKey(rawKey);
 
     if (INVALID_KEYS.has(key)) {
-      return undefined;
+      throw new Error(
+        `[volta-json-ptr] Security Risk: Forbidden key "${key}" found in static path "${path}"`,
+      );
     }
 
-    // 属性访问逻辑
     if (Array.isArray(result)) {
-      // 仅允许合法数字索引. "-" 在 get 操作中无意义, 返回 undefined
-      if (key === '-' || !RE_STRICT_UINT.test(key)) {
-        return undefined;
-      }
-      result = result[key as any];
+      if (!RE_STRICT_UINT.test(key)) return undefined;
+
+      result = result[Number(key)];
     } else {
-      // 对象访问, 包含对空字符串键名 "" 的支持
       result = result[key];
     }
   }
@@ -52,6 +46,29 @@ export function seek(obj: any, path: string): JsonValue | undefined {
   return result;
 }
 
-export const peek = seek;
+type Getter = (obj: any) => any;
+
+const JIT_CACHE = new Map<string, Getter>();
+
+export function peek<T extends JsonValue, P extends string>(obj: T, path: P): GetByPointer<T, P>;
+export function peek(obj: any, path: string) {
+  let fn = JIT_CACHE.get(path);
+
+  if (!fn) {
+    const body = `return (obj) => obj${transformPointerToChain(path)}`;
+
+    try {
+      fn = new Function(body)() as Getter;
+      JIT_CACHE.set(path, fn);
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  }
+
+  return fn(obj);
+}
+
+export const $seek = seek;
 
 export type { GetByPointer, JsonValue };

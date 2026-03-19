@@ -1,5 +1,5 @@
 import { Bench } from 'tinybench';
-import { peek, seek } from 'volta-json-ptr';
+import { $seek, seek, peek } from 'volta-json-ptr';
 
 const testData = {
   shallow: { a: 'value', b: 123, c: true },
@@ -9,12 +9,16 @@ const testData = {
 
 const bench = new Bench({ name: 'Benchmark', time: 300, iterations: 10000 });
 
-bench.add('runtime', () => {
-  const _tmp = peek(testData, '/deep/a/b/c/d/e');
+bench.add('Runtime', () => {
+  const _tmp = $seek(testData, '/deep/a/b/c/d/e');
 });
 
-bench.add('compiled', () => {
+bench.add('Compiled', () => {
   const _tmp = seek(testData, '/deep/a/b/c/d/e/');
+});
+
+bench.add('JIT', () => {
+  const _tmp = peek(testData, '/deep/a/b/c/d/e');
 });
 
 console.log(bench.name, 'running...');
