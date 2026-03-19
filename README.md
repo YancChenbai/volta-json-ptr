@@ -1,15 +1,11 @@
 # volta-json-ptr 🚀
 
-**极速 JSON Pointer 解析工具，支持构建时 AOT 优化。**
+**也许是极速 JSON Pointer 解析工具**
 
 ## 📦 安装
 
 ```bash
-# 1. 运行时核心（必须）
-npm install @volta-json-ptr
-
-# 2. 编译器插件（开发依赖，可选）
-npm install -D @volta-json-ptr/compiler
+npm install volta-json-ptr
 ```
 
 ---
@@ -21,48 +17,153 @@ npm install -D @volta-json-ptr/compiler
 直接在项目中使用 `seek` 函数，享有完整的类型推导。
 
 ```typescript
-import { seek } from '@volta-json-ptr';
+import { seek } from 'volta-json-ptr';
 
 const data = { a: { b: [{ c: 1 }] } };
 const value = seek(data, '/a/b/0/c'); // 结果: 1
 ```
 
-### 2\. 自动优化 (构建时)
+### 1.1 轻量级访问 (JIT 优化)
 
-通过安装 `@volta-json-ptr/compiler`，可以在构建阶段将 `seek` 自动替换为原生 JavaScript 可选链，实现 **0 运行时开销**。
-
-#### **Vite**
+如果你需要极快的性能且路径格式固定，使用 `peek` 函数。它通过 JIT 优化显著提升了读取速度。**但请注意，它只会对常见的危险键（如 `__proto__` / `constructor` / `prototype`）进行基本拦截，并不保证对所有未预期的输入都做安全过滤。**
 
 ```typescript
-// vite.config.ts
-import jsonPtrCompiler from '@volta-json-ptr/compiler/vite';
+import { peek } from 'volta-json-ptr';
 
-export default {
-  plugins: [jsonPtrCompiler()],
-};
+const data = { a: { b: [{ c: 1 }] } };
+const value = peek(data, '/a/b/0/c'); // 结果: 1
 ```
 
-#### **Rolldown**
+### 1.2 不被允许的路径 (安全限制)
+
+为了避免原型链污染和意外行为，`seek` 会拒绝访问以下危险键，并直接返回 `undefined`：
+
+- `__proto__`
+- `constructor`
+- `prototype`
+
+> 如果你使用 `peek`，请确保你的路径只访问可信数据，因为 `peek` 不会做这类安全校验。
+
+### 2\. 自动优化 (构建时)
+
+通过安装编译器插件，可以在构建阶段将 `seek` 自动替换为原生 JavaScript 可选链，实现 **0 运行时开销**。
+
+<details>
+<summary>Vite</summary><br>
+
+```ts
+// vite.config.ts
+import VoltaJsonPtr from 'volta-json-ptr/vite';
+
+export default defineConfig({
+  plugins: [VoltaJsonPtr()],
+});
+```
+
+<br></details>
+
+<details>
+<summary>Rolldown</summary><br>
 
 ```typescript
 // rolldown.config.js
-import jsonPtrCompiler from '@volta-json-ptr/compiler/rolldown';
+import VoltaJsonPtr from 'volta-json-ptr/rolldown';
 
 export default {
-  plugins: [jsonPtrCompiler()],
+  plugins: [VoltaJsonPtr()],
 };
 ```
 
-#### **Webpack**
+<br></details>
+
+<details>
+<summary>Webpack</summary><br>
 
 ```javascript
 // webpack.config.js
-const jsonPtrCompiler = require('@volta-json-ptr/compiler/webpack');
+const VoltaJsonPtr = require('volta-json-ptr/webpack');
 
 module.exports = {
-  plugins: [jsonPtrCompiler()],
+  plugins: [VoltaJsonPtr()],
 };
 ```
+
+<br></details>
+
+<details>
+<summary>Rollup</summary><br>
+
+```typescript
+// rollup.config.js
+import VoltaJsonPtr from 'volta-json-ptr/rollup';
+
+export default {
+  plugins: [VoltaJsonPtr()],
+};
+```
+
+<br></details>
+
+<details>
+<summary>Rspack</summary><br>
+
+```javascript
+// rspack.config.js
+const VoltaJsonPtr = require('volta-json-ptr/rspack');
+
+module.exports = {
+  plugins: [new VoltaJsonPtr()],
+};
+```
+
+<br></details>
+
+<details>
+<summary>Esbuild</summary><br>
+
+```javascript
+// build.js
+import VoltaJsonPtr from 'volta-json-ptr/esbuild';
+
+esbuild.build({
+  entryPoints: ['src/index.js'],
+  bundle: true,
+  plugins: [VoltaJsonPtr()],
+});
+```
+
+<br></details>
+
+<details>
+<summary>Farm</summary><br>
+
+```javascript
+// farm.config.js
+import VoltaJsonPtr from 'volta-json-ptr/farm';
+
+export default {
+  plugins: [VoltaJsonPtr()],
+};
+```
+
+<br></details>
+
+<details>
+<summary>Bun</summary><br>
+
+```typescript
+// build.ts
+import voltaJsonPtr from 'volta-json-ptr/bun';
+
+await Bun.build({
+  entrypoints: ['./index.ts'],
+  outdir: './out',
+  plugins: [voltaJsonPtr()],
+});
+
+```
+
+<br></details>
 
 ---
 

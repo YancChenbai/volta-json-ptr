@@ -9,6 +9,6 @@ export default defineConfig({
   format: 'esm',
   plugins: [fastJsonPtr()],
   deps: {
-    neverBundle: ['tinybench'],
+    neverBundle: ['tinybench', 'volta-json-ptr'],
   },
 });

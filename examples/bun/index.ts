@@ -7,5 +7,4 @@ const testData = {
 };
 
 console.log(peek(testData, '/deep/a/b/c/d/e'));
-
-console.log(seek(testData, '/deep/a/b/c/d/e/'));
+console.log(seek(testData, '/deep/a/b/c/d/e'));
