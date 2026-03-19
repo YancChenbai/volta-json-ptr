@@ -48,7 +48,33 @@ export function seek(obj: any, path: string): JsonValue | undefined {
 
 type Getter = (obj: any) => any;
 
-const JIT_CACHE = new Map<string, Getter>();
+class LRU<K, V> {
+  private cache = new Map<K, V>();
+  constructor(private readonly max: number = 1000) {}
+
+  get(key: K): V | undefined {
+    const item = this.cache.get(key);
+    if (item !== undefined) {
+      this.cache.delete(key);
+      this.cache.set(key, item);
+    }
+    return item;
+  }
+
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.max) {
+      const result = this.cache.keys().next();
+      if (!result.done) {
+        this.cache.delete(result.value);
+      }
+    }
+    this.cache.set(key, value);
+  }
+}
+
+const JIT_CACHE = new LRU<string, Getter>(500);
 
 export function peek<T extends JsonValue, P extends string>(obj: T, path: P): GetByPointer<T, P>;
 export function peek(obj: any, path: string) {
