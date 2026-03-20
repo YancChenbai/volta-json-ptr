@@ -1,9 +1,9 @@
 import { RE_STRICT_UINT, INVALID_KEYS, transformPointerToChain, decodePointerKey } from '#shared';
 import type { GetByPointer, JsonValue } from '#shared';
 
-export function seek<T extends JsonValue, P extends string>(obj: T, path: P): GetByPointer<T, P>;
+export function seek<T extends any, P extends string>(obj: T, path: P): GetByPointer<T, P>;
 
-export function seek(obj: any, path: string): JsonValue | undefined {
+export function seek(obj: any, path: string) {
   // 根路径处理："" 或 "/" 指向原对象
   if (path === '' || path === '/') return obj;
 
@@ -76,7 +76,7 @@ class LRU<K, V> {
 
 const JIT_CACHE = new LRU<string, Getter>(500);
 
-export function peek<T extends JsonValue, P extends string>(obj: T, path: P): GetByPointer<T, P>;
+export function peek<T extends any, P extends string>(obj: T, path: P): GetByPointer<T, P>;
 export function peek(obj: any, path: string) {
   let fn = JIT_CACHE.get(path);
 
