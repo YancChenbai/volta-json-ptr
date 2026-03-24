@@ -1,15 +1,15 @@
 {
   "name": "bun",
-  "module": "index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "module": "index.ts",
+  "dependencies": {
+    "volta-json-ptr": "0.0.1-beta.2"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "volta-json-ptr": "0.0.1-beta.2"
   }
 }

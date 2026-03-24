@@ -10,6 +10,9 @@
     "package.json"
   ],
   "type": "module",
+  "imports": {
+    "#shared": "./src/shared/index.ts"
+  },
   "exports": {
     ".": {
       "dev": "./src/runtime.ts",
@@ -74,35 +77,34 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest --watch run",
-    "test:ui": "vitest --ui",
+    "test": "vp test run",
+    "test:watch": "vp test --watch run",
+    "test:ui": "vp test --ui",
     "typecheck": "tsc --noEmit",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "build": "tsdown",
+    "fmt": "vp fmt",
+    "fmt:check": "vp fmt --check",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "build": "vp pack",
     "release:prepare": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "release": "pnpm release:prepare && bumpp && pnpm publish",
-    "benchmark": "pnpm build && pnpm --filter @volta-json-ptr/benchmark run start"
+    "benchmark": "vp pack && vp test bench"
   },
   "dependencies": {
     "oxc-parser": "^0.120.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
+    "@jsonjoy.com/json-pointer": "^18.1.0",
     "@oxc-project/types": "^0.121.0",
     "@vitest/ui": "^4.1.0",
     "bumpp": "^11.0.1",
     "magic-string": "^0.30.21",
-    "oxfmt": "^0.41.0",
-    "oxlint": "^1.56.0",
     "simple-git-hooks": "^2.13.1",
-    "tsdown": "^0.21.4",
     "typescript": "^5.9.3",
     "unplugin": "^3.0.0",
-    "vitest": "^4.1.0"
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm fmt & pnpm lint:fix",

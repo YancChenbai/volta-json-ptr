@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vp dev",
     "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
-    "build-only": "vite build",
+    "preview": "vp preview",
+    "build-only": "vp build",
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
@@ -21,9 +21,10 @@
     "@vue/tsconfig": "^0.8.1",
     "npm-run-all2": "^8.0.4",
     "typescript": "~5.9.3",
-    "vite": "^7.3.1",
+    "vite": "catalog:",
     "vite-plugin-vue-devtools": "^8.0.6",
-    "vue-tsc": "^3.2.5"
+    "vue-tsc": "^3.2.5",
+    "vite-plus": "catalog:"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

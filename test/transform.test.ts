@@ -1,5 +1,5 @@
 import { parse } from 'oxc-parser';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 
 import { transformPointerToChain } from '../src/shared';
 import { handleSeekMacro, transform, FileType, findMethodImport } from '../src/transform';

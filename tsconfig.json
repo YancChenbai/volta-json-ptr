@@ -18,6 +18,7 @@
     "customConditions": ["dev"],
     "paths": {
       "#shared": ["./src/shared/index.ts"],
+      "volta-json-ptr": ["./src/runtime.ts"],
     },
   },
   "include": ["./src", "*.config.*", "test", "benchmark"],
