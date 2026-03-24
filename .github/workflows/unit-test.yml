@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: "22"
+          node-version: '22'
 
       - name: Install
         run: vp install
