@@ -10,29 +10,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.1.0
-
-      - name: Set node LTS
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: lts/*
-          cache: pnpm
+          node-version: "22"
 
       - name: Install
-        run: pnpm install
+        run: vp install
 
-      - name: Build
-        run: pnpm run build
-
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Typecheck
-        run: pnpm run typecheck
+      - name: Check
+        run: vp check
 
       - name: Test
-        run: pnpm run test
+        run: vp test
+
+      - name: Build
+        run: vp pack

@@ -6,7 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   release:
@@ -16,30 +16,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.1.0
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "22"
 
       - name: Set node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Install
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Lint
-        run: pnpm run lint
-
-      - name: Typecheck
-        run: pnpm run typecheck
-
-      - name: Test
-        run: pnpm run test
+      - run: vp install
+      - run: vp check
+      - run: vp test
+      - run: vp pack
 
       - name: Publish to NPM
         run: |
@@ -52,7 +43,7 @@ jobs:
           pnpm publish --tag $TAG --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       - run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

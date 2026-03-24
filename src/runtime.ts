@@ -1,19 +1,19 @@
-import { RE_STRICT_UINT, INVALID_KEYS, transformPointerToChain, decodePointerKey } from "#shared";
-import type { GetByPointer, JsonValue } from "#shared";
+import { RE_STRICT_UINT, INVALID_KEYS, transformPointerToChain, decodePointerKey } from '#shared';
+import type { GetByPointer, JsonValue } from '#shared';
 
 export function seek<T extends any, P extends string>(obj: T, path: P): GetByPointer<T, P>;
 
 export function seek(obj: any, path: string) {
   // 根路径处理："" 或 "/" 指向原对象
-  if (path === "" || path === "/") return obj;
+  if (path === '' || path === '/') return obj;
 
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
   // 路径切分
-  const segments = normalizedPath.split("/").slice(1);
+  const segments = normalizedPath.split('/').slice(1);
 
   // 如果以斜杠结尾（如 "/a/"）, 去掉末尾产生的空片段
-  if (segments.length > 1 && segments[segments.length - 1] === "") {
+  if (segments.length > 1 && segments[segments.length - 1] === '') {
     segments.pop();
   }
 
@@ -21,7 +21,7 @@ export function seek(obj: any, path: string) {
 
   for (const rawKey of segments) {
     // 如果当前层级无法继续深入 (null 或非对象), 直接返回 undefined
-    if (result == null || typeof result !== "object") {
+    if (result == null || typeof result !== 'object') {
       return undefined;
     }
 

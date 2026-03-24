@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-
 import { $seek, peek } from 'volta-json-ptr';
+import { reactive, ref } from 'vue';
 
 const json = {
   foo: {
@@ -20,12 +19,13 @@ const baz = seek(json, '/foo/bar/baz');
 const data = seek(json, '/foo/bar/01/0');
 const qux = peek(json, '/foo/bar/qux');
 
-const myRef = ref({ f: 1 })
-const myRea = reactive({ f: 1 })
+
+const myRef = ref({ f: 1 });
+const myRea = reactive({ f: 1 });
+
 
 console.log($seek(json, '/foo'));
 console.log(qux);
-
 </script>
 
 <template>

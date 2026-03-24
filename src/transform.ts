@@ -1,14 +1,14 @@
-import MagicString from "magic-string";
-import { CallExpression, parse, ParseResult, Visitor } from "oxc-parser";
+import MagicString from 'magic-string';
+import { CallExpression, parse, ParseResult, Visitor } from 'oxc-parser';
 
-import { transformPointerToChain } from "#shared";
+import { transformPointerToChain } from '#shared';
 
-const PACKAGE_NAME = "volta-json-ptr";
-const MACRO_FUNCTION = "seek";
+const PACKAGE_NAME = 'volta-json-ptr';
+const MACRO_FUNCTION = 'seek';
 
 export enum FileType {
-  JS = "js",
-  VUE = "vue",
+  JS = 'js',
+  VUE = 'vue',
 }
 
 function findPackImport(ast: ParseResult) {
@@ -54,20 +54,20 @@ export function findMethodImport(ast: ParseResult) {
 }
 
 function recognizeJS(node: CallExpression) {
-  if (node.callee.type !== "Identifier") return null;
+  if (node.callee.type !== 'Identifier') return null;
   if (node.callee.name !== MACRO_FUNCTION) return null;
 
   return node;
 }
 
 function recognizeVue(node: CallExpression) {
-  if (node.callee.type !== "MemberExpression") return null;
+  if (node.callee.type !== 'MemberExpression') return null;
 
   const { object, property } = node.callee;
 
-  if (object.type !== "Identifier" || property.type !== "Identifier") return null;
+  if (object.type !== 'Identifier' || property.type !== 'Identifier') return null;
 
-  if (!["_ctx", "$setup"].includes(object.name)) return null;
+  if (!['_ctx', '$setup'].includes(object.name)) return null;
 
   if (property.name === MACRO_FUNCTION) return node;
 
@@ -84,7 +84,7 @@ function matchMacroCall(node: CallExpression, fileType: FileType = FileType.JS) 
 }
 
 function getFileType(id: string) {
-  if (id.includes(".vue")) return FileType.VUE;
+  if (id.includes('.vue')) return FileType.VUE;
 
   return FileType.JS;
 }
@@ -111,8 +111,8 @@ export function handleSeekMacro(ast: ParseResult, fileType: FileType = FileType.
       if (
         matchNode.arguments.length == 2 &&
         arg0 &&
-        arg1?.type === "Literal" &&
-        typeof arg1.value === "string"
+        arg1?.type === 'Literal' &&
+        typeof arg1.value === 'string'
       ) {
         list.push([
           { start: matchNode.start, end: matchNode.end },

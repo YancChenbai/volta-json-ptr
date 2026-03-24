@@ -19,7 +19,8 @@
     "paths": {
       "#shared": ["./src/shared/index.ts"],
       "volta-json-ptr": ["./src/runtime.ts"],
-    },
+      "volta-json-ptr/rolldown": ["./src/plugins/rolldown.ts"]
+    }
   },
-  "include": ["./src", "*.config.*", "test", "benchmark"],
+  "include": ["./src", "*.config.*", "test", "benchmark"]
 }

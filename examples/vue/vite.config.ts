@@ -1,8 +1,8 @@
 import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'vite-plus';
 import vueDevTools from 'vite-plugin-vue-devtools';
+import { defineConfig } from 'vite-plus';
 import fastJsonPtr from 'volta-json-ptr/vite';
 
 // https://vite.dev/config/

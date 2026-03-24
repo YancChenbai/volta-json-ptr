@@ -160,7 +160,6 @@ await Bun.build({
   outdir: './out',
   plugins: [voltaJsonPtr()],
 });
-
 ```
 
 <br></details>
